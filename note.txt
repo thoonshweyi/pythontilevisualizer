@@ -1,0 +1,216 @@
+=>Check Python Version
+python3 --Version
+pip list
+
+=>Building Virtual Environment
+
+mkdir part3chatbot
+cd part3chatbot/
+python3 -m venv fastapienv 
+ls 
+source fastapienv/bin/activate 
+pip3 list
+
+=> Install Others 
+https://fastapi.tiangolo.com/
+https://www.uvicorn.org/
+pip install fastapi uvicorn
+
+
+
+htps://pypi.org/project/python-multipart/
+pip install python-multipart
+
+=>Instally Python Image Library
+https://pillow.readthedocs.io/en/stable/
+pip install pillow
+
+=> ENV 
+1. Create File 
+     .env 
+
+2. Install python-dotenv
+https://pypi.org/project/python-dotenv/
+pip install python-dotenv
+
+3.Import 
+
+import os
+from dotenv import dotenv_values
+
+
+----------------------------------
+
+
+=> Install SAM
+
+pip install torch torchvision // gpu
+
+
+
+
+
+
+
+
+
+
+
+
+=> Deploy FastApi Python Project on server
+
+pip freeze > requirements.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+အရမ်းရိုးရှင်းတဲ့   tile visualizer app  တစ်ခုကိုဖန်တီးမလို့ပါ။ အဲ့ဒီ app  မှာ Wall, Floor ခွဲခြားတာကတော့အရေးကြီးတယ်။
+User click လိုက်တဲ့နေရာကို AI က mask ပြန်ထုတ်ပေးထား  Flow နဲ့ AI က walls, floos တွေကို auto detect လုပ်ပေးထားတဲ့ flow ဘယ်ဟာနဲ့စသင့်လဲ
+
+သင်လုပ်မယ့် 2D Tile Visualizer App အတွက်တော့ ကျွန်တော်အကြံပေးချင်တာက User က Wall / Floor ကို Click လုပ်ပြီး AI က Mask ထုတ်ပေးတဲ့ Flow နဲ့ အရင်စပါ။ နောက်ပိုင်းမှ AI Auto Detect ကို ထပ်ပေါင်းပါ။
+
+အဓိကအကြောင်းရင်းက Wall နဲ့ Floor ကို မှန်မှန်ခွဲခြားနိုင်ဖို့က ဒီ App ရဲ့ အရေးကြီးဆုံးအပိုင်းဖြစ်ပြီး၊ အစကတည်းက Auto Detect အားလုံးလုပ်ခိုင်းရင် AI မှားတဲ့နေရာတွေကို ပြန်ပြင်ရတာနဲ့ development ရှုပ်ထွေးမှု ပိုများနိုင်လို့ပါ။
+
+Flow နှစ်ခုကို နှိုင်းယှဉ်ကြည့်ရအောင်
+Flow A — User Click + AI Mask
+အရင်စဖို့ အကြံပြု
+
+User က ကိုယ်လိုချင်တဲ့ Wall / Floor ကို ရွေးချယ်တယ်။
+
+Room photo Upload တင်မယ်။
+
+Wall သို့မဟုတ် Floor ကို Click လုပ်မယ်။
+
+AI က ရွေးထားတဲ့နေရာရဲ့ Mask ထုတ်မယ်။
+
+Mask ကို User က စစ်ဆေးပြီး လိုအပ်ရင် ပြင်မယ်။
+
+Tile ကို ရွေးပြီး Perspective အတိုင်း Apply လုပ်မယ်။
+
+Flow B — AI Auto Detect
+
+AI က ပုံထဲက Wall / Floor တွေကို အလိုအလျောက် ရှာဖွေတယ်။
+
+Room photo Upload တင်မယ်။
+
+AI က Wall, Floor နဲ့ Furniture တွေကို ခွဲခြားမယ်။
+
+ရှာတွေ့တဲ့ Area တွေကို Highlight လုပ်မယ်။
+
+User က သုံးချင်တဲ့ Wall / Floor ကို ရွေးမယ်။
+
+Tile ကို Apply လုပ်မယ်။
+
+အသုံးပြုရတာ ပိုလွယ်ပေမယ့် Auto Detect မှားတဲ့အခါ ပြင်ဆင်နိုင်တဲ့ UI နဲ့ ပိုကောင်းတဲ့ Segmentation Model လိုအပ်နိုင်ပါတယ်။
+
+ဘယ် AI Model နဲ့ စသင့်လဲ?
+
+အပိုင်း
+
+	
+
+အကြံပြုချက်
+
+
+
+
+Click လုပ်ပြီး Mask ထုတ်ရန်
+
+	
+
+SAM 2
+
+
+
+
+Wall / Floor ခွဲခြားရန်
+
+	
+
+User ရွေးချယ်မှု + လိုအပ်မှ Semantic Segmentation
+
+
+
+
+Tile ပုံကို နေရာချရန်
+
+	
+
+OpenCV getPerspectiveTransform()
+
+
+
+
+Frontend
+
+	
+
+React + Vite
+
+
+
+
+Backend
+
+	
+
+Python + FastAPI (AI inference အတွက်)
+
+အရေးကြီးတာတစ်ခုရှိပါတယ်။ SAM က Click လုပ်ထားတဲ့နေရာကို Segmentation လုပ်ပေးနိုင်ပေမယ့်၊ အဲဒီနေရာဟာ Wall လား Floor လားဆိုတာကို အလိုအလျောက် အဓိပ္ပာယ်ခွဲခြားပေးတဲ့ Model မဟုတ်ပါဘူး။ ဒါကြောင့် User ကို အရင်ဆုံး Wall သို့မဟုတ် Floor ရွေးခိုင်းပြီးမှ Click လုပ်ခိုင်းရင် ပိုရိုးရှင်းပါတယ်။
+
+ပထမဆုံး MVP ကို ဒီလိုတည်ဆောက်ပါ
+
+1. Upload Room Photo
+
+ဓာတ်ပုံတစ်ပုံ ရွေးချယ်ရန်
+
+2. Select Surface
+
+Wall
+
+Floor
+
+ရွေးချယ်ထားသော Surface ပေါ်တွင် Click လုပ်ရန်
+
+3. AI Mask Generation
+
+SAM 2 ဖြင့် Mask ထုတ်ရန်
+
+4. Confirm / Adjust Mask
+
+မှန်မမှန်စစ်ပြီး လိုအပ်လျှင် ပြင်ရန်
+
+5. Apply Tile
+
+Perspective အတိုင်း Tile ကို ထည့်သွင်းရန်
+
+နောက်ပိုင်း Version 2 မှာ AI က Wall / Floor ကို Auto Detect လုပ်ပြီး Highlight ပြပေးတဲ့ Feature ထပ်ပေါင်းနိုင်ပါတယ်။ အဲဒီအခါ User က Click လုပ်ပြီး Mask ရှာစရာမလိုတော့ပါဘူး။
+
+ကျွန်တော့်အမြင်အရ ပထမဆုံး Version မှာ Auto Detect ကို အရင်မလုပ်ဘဲ Click → Mask → Tile Apply ဆိုတဲ့ Flow ကို အလုပ်လုပ်အောင် အရင်တည်ဆောက်တာက အကောင်းဆုံးပါ။

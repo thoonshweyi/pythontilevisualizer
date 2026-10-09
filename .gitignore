@@ -1,0 +1,32 @@
+# Byte-compiled / Python Cache Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+fastapienv/
+venv/
+env/
+.venv/
+
+# Environment Variables & Secrets (API keys, Passwords များကို Git ပေါ် မပါစေရန်)
+.env
+.env.local
+.env.*.local
+
+# Database Files (Local စမ်းသပ်စဉ် ထွက်လာသော SQLite DB များ)
+*.db
+*.sqlite3
+
+# IDE & Code Editor Configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Output / Log Files
+*.log
