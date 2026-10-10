@@ -47,7 +47,18 @@ from dotenv import dotenv_values
 pip install torch torchvision // gpu
 
 
+SAM 2 ကို run မယ့် Server ရဲ့ virtual environment ထဲမှာ CPU သုံးမယ်ဆိုရင်—
+pip install torch torchvision \
+  --index-url https://download.pytorch.org/whl/cpu \
+  --timeout 120 --retries 5
 
+
+
+git clone https://github.com/facebookresearch/sam2.git
+cd sam2
+pip install -e .
+
+// 120, 223 (x,y)
 
 
 
@@ -59,17 +70,142 @@ pip install torch torchvision // gpu
 
 => Deploy FastApi Python Project on server
 
-pip freeze > requirements.txt
+
+၁။ Project ကို Server ပေါ်သို့ ပို့ခြင်း
+     ၁။ Local စက်ရဲ့ venv ကို Server ပေါ် မတင်ရပါ (OS မတူရင် အလုပ်မလုပ်ပါ)။ Local venv မဟုတ်ဘဲ လိုအပ်တဲ့ Python packages စာရင်းကိုပဲ requirements.txt ထုတ်ပါ။
+
+     Bash
+     pip freeze > requirements.txt
+     ၂။ Project Folder ကို GitHub သို့မဟုတ် Git Repository ပေါ် တင်ပါ (သို့မဟုတ်) scp / SFTP အသုံးပြုပြီး Server ပေါ်သို့ ကူးပါ။
+
+     Note: venv folder နဲ့ __pycache__ တွေကို .gitignore ထဲ ထည့်ထားရန် မမေ့ပါနဲ့။
+
+၂။ Server ပေါ်တွင် Environment ပြင်ဆင်ခြင်း
+     Server ထဲသို့ SSH ဖြင့် ဝင်ရောက်ပြီး Python နဲ့ လိုအပ်သည်များ တပ်ဆင်ပါ။
+
+     # Server package များ Update လုပ်ခြင်း
+     sudo apt update && sudo apt upgrade -y
+
+     # Python3, pip နဲ့ venv တပ်ဆင်ခြင်း
+     sudo apt install python3-pip python3-venv nginx -y
+
+     # Project တည်ရှိမည့် Folder သို့သွား၍ venv အသစ်ဆောက်ခြင်း
+     cd /path/to/your-project
+     python3 -m venv venv
+     source venv/bin/activate
+
+     # Packages များ တပ်ဆင်ခြင်း
+     pip install -r requirements.txt
+     pip install gunicorn uvicorn
 
 
+               နည်းလမ်း ၂ - pip + virtualenv သုံးပြီး apt မလိုဘဲ venv ဆောက်ခြင်း (အမြန်ဆုံး)
+               apt ရဲ့ broken dependencies တွေကို ကျော်ပြီး Virtual Environment ဖန်တီးသည့် နည်းလမ်းဖြစ်ပါတယ်။
+
+               Bash
+               # virtualenv တပ်ဆင်ပါ
+               pip3 install virtualenv --user
+
+               # venv အသစ် ဆောက်ပါ
+               virtualenv fastapienv
+
+               # Activate လုပ်ပါ
+               source fastapienv/bin/activate
+၃။ Systemd Service (Background Service) ဖန်တီးခြင်း
+     FastAPI အမြဲတမ်း နောက်ကွယ်မှာ အလုပ်လုပ်နေစေရန် Systemd Service တစ်ခု ဖန်တီးရပါမည်။
+
+     Bash
+     sudo nano /etc/systemd/system/fastapi.service
+     အောက်ပါ Content များကို ထည့်ပါ (your-user နဲ့ /path/to/your-project များကို သင့် Server အချက်အလက်များအတိုင်း ပြင်ပါ) -
+
+     Ini, TOML
+     [Unit]
+     Description=FastAPI Application
+     After=network.target
+
+     [Service]
+     User=your-user
+     Group=www-data
+     WorkingDirectory=/path/to/your-project
+     ExecStart=/path/to/your-project/venv/bin/gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 127.0.0.1:8000
+
+     [Install]
+     WantedBy=multi-user.target
+     Note: main:app နေရာတွင် သင်၏ entry point file အမည် (ဥပမာ main.py ဖြစ်ပါက main) နှင့် FastAPI instance နာမည် (app = FastAPI()) ကို စာလုံးပေါင်း မှန်အောင် ထည့်ပါ။
+
+     Service ကို စတင်ပြီး Enable လုပ်ပါ -
+
+     Bash
+     sudo systemctl start fastapi
+     sudo systemctl enable fastapi
+     sudo systemctl status fastapi
 
 
+5. Nginx Configuration ရေးခြင်း
+
+Nginx က public request တွေကို လက်ခံပြီး 127.0.0.1:8000 ဆီ ပို့ပေးပါမယ်။ Uvicorn ကို public network ကနေ တိုက်ရိုက်ဝင်လို့မရအောင် localhost မှာပဲ bind ထားတာ ဖြစ်ပါတယ်။ 
+Uvicorn
++1
+
+Configuration file ဖွင့်ပါ။
+
+sudo nano /etc/nginx/sites-available/fastapi
+
+ဒီ configuration ကို ထည့်ပါ။
 
 
+server {
+    listen 80;
+    server_name api.example.com;
 
+    client_max_body_size 50M;
 
+    location / {
+        proxy_pass http://127.0.0.1:8000;
 
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+api.example.com နေရာမှာ ကိုယ့် Domain ကို အစားထိုးပါ။
+
+Domain မရှိသေးဘဲ Server IP နဲ့ စမ်းချင်ရင် server_name ကို ဒီလို သတ်မှတ်နိုင်ပါတယ်။
+
+server_name _;
+
+သတိပြုရန် — client_max_body_size 50M က upload request ရဲ့ အများဆုံး body size ကို သတ်မှတ်တာပါ။ AI model အတွက် image upload လုပ်မယ်ဆိုရင် ကိုယ့်လိုအပ်ချက်အလိုက် ပြင်နိုင်ပါတယ်။
+
+Site ကို enable လုပ်ပါ။
+
+sudo ln -s /etc/nginx/sites-available/fastapi /etc/nginx/sites-enabled/fastapi
+
+Default site နဲ့ configuration conflict ဖြစ်နေမှသာ လိုအပ်တဲ့ site ကို disable လုပ်ပါ။
+
+sudo nginx -t
+
+Configuration test အောင်မြင်ရင်—
+
+sudo systemctl reload nginx
+6. API ကို စမ်းသပ်ခြင်း
+
+Server အတွင်းက စမ်းရန်
+
+curl http://127.0.0.1:8000/health
+
+Nginx ကတစ်ဆင့် စမ်းရန်
+
+curl http://127.0.0.1/health
+
+Swagger API documentation
+
+http://YOUR_SERVER_IP/docs
 
 
 
