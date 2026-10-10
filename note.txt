@@ -60,7 +60,13 @@ pip install -e .
 
 // 120, 223 (x,y)
 
+=>Sam model
+cd /var/www/html/code/pythontilevisualizer/sam2
 
+mkdir -p checkpoints
+
+wget -O checkpoints/sam2.1_hiera_tiny.pt \
+https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
 
 
 
