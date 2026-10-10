@@ -9,10 +9,10 @@ from sam2.sam2_image_predictor import SAM2ImagePredictor
 
 # Project paths
 REPO_DIR = Path(__file__).resolve().parent
-PROJECT_DIR = REPO_DIR.parent
+PROJECT_DIR = REPO_DIR
 
 IMAGE_PATH = PROJECT_DIR / "static/images" / "simplebedroom.jpg"
-CHECKPOINT_PATH = REPO_DIR / "checkpoints" / "sam2.1_hiera_tiny.pt"
+CHECKPOINT_PATH = REPO_DIR / "sam2_repo/checkpoints" / "sam2.1_hiera_tiny.pt"
 CONFIG_PATH = "configs/sam2.1/sam2.1_hiera_t.yaml"
 
 # Change these coordinates to a point INSIDE the wall

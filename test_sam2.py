@@ -4,7 +4,7 @@ from sam2.build_sam import build_sam2
 
 BASE_DIR = Path(__file__).resolve().parent
 
-checkpoint_path = BASE_DIR / "checkpoints" / "sam2.1_hiera_tiny.pt"
+checkpoint_path = BASE_DIR / "sam2_repo/checkpoints" / "sam2.1_hiera_tiny.pt"
 
 print("Loading SAM 2.1 Tiny on CPU...", flush=True)
 

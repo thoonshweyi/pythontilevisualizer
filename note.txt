@@ -56,7 +56,10 @@ pip install torch torchvision \
 
 git clone https://github.com/facebookresearch/sam2.git
 cd sam2
-pip install -e .
+pip install -e . // * Running from Parent Directory error
+
+mv sam2 sam2_repo
+python3 -m pip install -e ./sam2_repo
 
 // 120, 223 (x,y)
 
