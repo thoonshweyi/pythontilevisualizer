@@ -11,6 +11,26 @@ ls
 source fastapienv/bin/activate 
 pip3 list
 
+
+
+(Virtualenv module ကို pip ဖြင့် တိုက်ရိုက် သုံးသည့်နည်း)
+အကယ်၍ apt ရဲ့ Dependency တွေ ပုပ်နေပြီး ပြန်ပြင်ရခက်နေပါက apt မသုံးဘဲ python3-pip မှတစ်ဆင့် virtualenv ကို တိုက်ရိုက် သုံးလို့ရပါတယ် -
+
+Bash
+# pip3 မှတစ်ဆင့် virtualenv ကို install လုပ်ပါ
+sudo apt install python3-pip -y
+pip3 install virtualenv
+
+# virtualenv ဖြင့် venv ပြန်ဆောက်ပါ
+cd /var/www/html/code/pythontilevisualizer
+rm -rf fastapienv
+virtualenv fastapienv
+
+# Activate လုပ်ပါ
+source fastapienv/bin/activate
+
+
+
 => Install Others 
 https://fastapi.tiangolo.com/
 https://www.uvicorn.org/
@@ -61,7 +81,19 @@ pip install -e . // * Running from Parent Directory error
 mv sam2 sam2_repo
 python3 -m pip install -e ./sam2_repo
 
-// 120, 223 (x,y)
+2. Git မသုံးဘဲ ZIP download လုပ်ပါ
+မင်းရဲ့ project folder ထဲမှာ run ပါ။
+cd /var/www/html/code/pythontilevisualizer
+
+curl -fL --retry 3 \
+  https://github.com/facebookresearch/sam2/archive/refs/heads/main.zip \
+  -o sam2.zip
+
+
+Download အောင်မြင်ရင်—
+ls -lh sam2.zip
+unzip sam2.zip
+mv sam2-main sam2
 
 =>Sam model
 cd /var/www/html/code/pythontilevisualizer/sam2
