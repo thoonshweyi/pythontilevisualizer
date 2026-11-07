@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
+from point_estimator import estimate_wall_points
 
 
 # ==================================================
@@ -121,6 +122,7 @@ def health_check():
 # ==================================================
 
 @app.post("/api/mask")
+@app.post("/api/estimate-points")
 async def create_mask(
     image: UploadFile = File(...),
     x: int = Form(...),
@@ -259,6 +261,20 @@ async def create_mask(
         encoded_mask.tobytes()
     ).decode("utf-8")
 
+    # Estimate TL, TR, BR, BL points by combining the mask outline
+    # with straight lines detected in the original room image.
+    try:
+        point_result = estimate_wall_points(
+            image_bgr,
+            mask_image,
+            segmentation_score=best_score,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Cannot estimate wall points: {exc}",
+        ) from exc
+
     print(
         f"Segmentation complete. Score: {best_score:.4f}",
         flush=True,
@@ -276,6 +292,7 @@ async def create_mask(
         "mask_format": "png_base64",
         "mask_encoding": "binary",
         "score": round(best_score, 4),
+        **point_result,
         "prompt": {
             "x": x,
             "y": y,
