@@ -30,3 +30,6 @@ Thumbs.db
 
 # Output / Log Files
 *.log
+
+sam2_repo/
+depth_anything_v2_repo/

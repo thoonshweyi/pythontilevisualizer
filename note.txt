@@ -251,16 +251,25 @@ http://YOUR_SERVER_IP/docs
 
 
 
+=Depth Anything
+cd /var/www/html/code/pythontilevisualizer
+
+# Clone repository
+git clone https://github.com/DepthAnything/Depth-Anything-V2.git
+
+# Enter repository
+cd Depth-Anything-V2
 
 
+mkdir -p checkpoints
+
+# Install additional dependencies
+pip install opencv-python matplotlib
 
 
-
-
-
-
-
-
+Checkpoint ကို Download လုပ်ပါ။
+wget https://huggingface.co/depth-anything/Depth-Anything-V2-Small/resolve/main/depth_anything_v2_vits.pth \
+-O checkpoints/depth_anything_v2_vits.pth
 
 
 
@@ -391,3 +400,166 @@ Perspective အတိုင်း Tile ကို ထည့်သွင်းရ�
 နောက်ပိုင်း Version 2 မှာ AI က Wall / Floor ကို Auto Detect လုပ်ပြီး Highlight ပြပေးတဲ့ Feature ထပ်ပေါင်းနိုင်ပါတယ်။ အဲဒီအခါ User က Click လုပ်ပြီး Mask ရှာစရာမလိုတော့ပါဘူး။
 
 ကျွန်တော့်အမြင်အရ ပထမဆုံး Version မှာ Auto Detect ကို အရင်မလုပ်ဘဲ Click → Mask → Tile Apply ဆိုတဲ့ Flow ကို အလုပ်လုပ်အောင် အရင်တည်ဆောက်တာက အကောင်းဆုံးပါ။
+
+
+
+
+
+
+
+Mesh Warping / Displacing 
+
+
+
+ဒီနည်းနဲ့လုပ်ဘယ်လိုလုပ်ရမှာလဲလို့။ fast api ကနေ depth map ထုတ်ပေးမယ်။ react frontend မှာ opencv နဲ့ tile ကပ်ထားတယ်
+
+FastAPI ဘက်ကနေ Depth Anything ကိုသုံးပြီး Depth Map ထုတ်ပေးမယ်၊ React Frontend ဘက်မှာ OpenCV နဲ့ Tile ကပ်မယ်ဆိုတဲ့ Hybrid Architecture က စွမ်းဆောင်ရည်ပိုင်းရော၊ Real-time Texture Controls တွေ (Scale, Rotation, Grout) ကို React မှာ ဆက်သုံးလို့ရတာကြောင့် အကောင်းဆုံး ပုံစံဖြစ်ပါတယ်။
+
+Mesh Warping / Displacing နည်းလမ်းကို ဒီစနစ်မှာ ဘယ်လို အကောင်အထည်ဖော်ရမလဲဆိုတာ တစ်ဆင့်ချင်း ရှင်းပြပေးပါမယ် -
+
+၁။ FastAPI Backend ဘက်မှာ လုပ်ရမယ့်အလုပ် (Depth & Mesh Grid)
+FastAPI က ပုံကိုလက်ခံရရှိတာနဲ့ Depth Anything နဲ့ နံရံရဲ့ 3D အစောင်းအကိုင်း (Mesh/Depth Gradient) ကို တွက်ထုတ်ပေးရပါမယ်။
+
+Depth Map ထုတ်ခြင်း: Depth Anything V2 ကိုသုံးပြီး နံရံရဲ့ Depth Map (
+Z-buffer) ကို ထုတ်ပါတယ်။
+
+Dense Grid & Displacement တွက်ခြင်း:
+
+နံရံဧရိယာပေါ်မှာ ကွက်စိပ်ဇယားကွက် (Grid Mesh - ဥပမာ 
+20×20 ဇယားကွက်) တစ်ခုကို တည်ဆောက်ပါတယ်။
+
+ဇယားကွက်ရဲ့ ထောင့်မှတ် (Vertices) တစ်ခုချင်းစီကို Depth Map ရဲ့ တန်ဖိုးနဲ့ တိုက်ပြီး ဘယ်လောက် တွန်းထုတ်ရမယ်/ဆွဲုံ့ရမယ် (Displacement) ဆိုတာကို NumPy နဲ့ တွက်ပါတယ်။
+
+Response ပို့ပေးခြင်း:
+
+အရင်ကလို ထောင့် ၄ ချက် (4 points) တည်း ပို့မယ့်အစား၊ အဲ့ဒီ စောင်းသွားတဲ့ ဇယားကွက်ရဲ့ Vertices တွေရဲ့ Coordinates အသစ်တွေ (သို့မဟုတ် OpenCV ရဲ့ map_x နဲ့ map_y remap matrices တွေကို) JSON format နဲ့ React ဘက်ကို ပြန်ပို့ပေးပါတယ်။
+
+၂. React Frontend ဘက်မှာ OpenCV နဲ့ Tile ကပ်ခြင်း (cv.remap သို့မဟုတ် Mesh Warping)
+React ဘက် (သင့်ရဲ့ လက်ရှိ applyProduct ဖန်ရှင်ထဲမှာ) က FastAPI ဆီကနေ အဲ့ဒီ Mesh Displacement data တွေကို လက်ခံရရှိပါတယ်။
+
+လက်ရှိ ကုဒ်မှာ: cv.getPerspectiveTransform က ထောင့် ၄ ချက် (4 points) ကိုပဲ ယူပြီး ရိုးရိုး ပြားချပ်ချပ် Perspective လုပ်ပါတယ်။
+
+Mesh Warping မှာ: FastAPI က ပို့ပေးတဲ့ ဇယားကွက်အချက်အလက် (သို့မဟုတ် Remap Maps) ကိုသုံးပြီး OpenCV ရဲ့ cv.remap() ကို အသုံးပြုပါတယ်။
+
+React ဘက်က OpenCV ကုဒ်ပုံစံက ဒီလိုပြောင်းသွားပါမယ် -
+
+JavaScript
+// FastAPI ဆီက ရလာတဲ့ deformation maps တွေကို သုံးပြီး remap လုပ်ခြင်း
+// (map_x နှင့် map_y သည် နံရံ၏ အစောင်းအကိုင်းအတိုင်း ညွတ်သွားသော pixel နေရာများ ဖြစ်သည်)
+
+let mapX = ... // FastAPI မှ ရလာသော X coordinates map
+let mapY = ... // FastAPI မှ ရလာသော Y coordinates map
+
+// Tile Texture ကို အဆိုပါ Mesh Maps အတိုင်း Warping လုပ်ခြင်း
+cv.remap(
+    tileMat,          // Texture လုပ်ထားသော Tile ပုံ
+    warpedMat,        // ရလာမည့် ရလဒ်
+    mapX,             // Mesh Warping ၏ X map
+    mapY,             // Mesh Warping ၏ Y map
+    cv.INTER_LINEAR,
+    cv.BORDER_CONSTANT,
+    new cv.Scalar(0, 0, 0, 0)
+);
+
+cv.imshow(canvas, warpedMat);
+ဒီစနစ်ရဲ့ အဓိက အသာချက်
+React UI မပျက်ခြင်း: User က Scale ပြောင်းတာ၊ Grout ချိန်တာ၊ Rotation လှည့်တာတွေကို React မှာ ဆက်လုပ်လို့ရနေပါတယ်။ အဲ့ဒီလို ချိန်လိုက်တိုင်း Texture Canvas က အသစ်ဖြစ်သွားပြီး၊ FastAPI က တွက်ပေးထားတဲ့ Mesh Remap Map အတိုင်း OpenCV က အစောင်းအကိုင်း မှန်မှန်ကန်ကန်နဲ့ Real-time ပေါ်လာစေပါတယ်။
+
+Accuracy: ရိုးရိုး ၄ ချက်တည်းနဲ့ မလုံလောက်တော့တဲ့ အထစ်အငေါ့ပါတဲ့ နံရံတွေမှာပါ Mesh Warping ကြောင့် Tile တွေက နံရံရဲ့ အခေါက်အစောင်းအတိုင်း သဘာဝကျကျ ကပ်သွားပါမယ်။
+
+အရင်ကလို ထောင့် ၄ ချက် (4 points) တည်း ပို့မယ့်အစား၊ အဲ့ဒီ စောင်းသွားတဲ့ ဇယားကွက်ရဲ့ Vertices တွေရဲ့ Coordinates အသစ်တွေ (သို့မဟုတ် OpenCV ရဲ့ map_x နဲ့ map_y remap matrices တွေကို) JSON format နဲ့ React ဘက်ကို ပြန်ပို့ပေးပါတယ်။
+
+
+
+api format ပြပေး 
+
+FastAPI ဘက်ကနေ Depth Map နဲ့ Mesh Warping (remap matrices သို့မဟုတ် warped vertices) တွေကို တွက်ထုတ်ပြီး React ဘက်ကို JSON format နဲ့ ပြန်ပို့ပေးမယ့် API Response Format ဥပမာကို အောက်ပါအတိုင်း ဖော်ပြပေးလိုက်ပါတယ် -
+
+1. JSON Response Format (API Output)
+FastAPI ကနေ JSON နဲ့ ပြန်ပို့တဲ့အခါ ကြီးမားတဲ့ Matrix ကြီးတွေ အစား Grid Vertices (ထောင့်မှတ်များ) ကို ပို့တာက network payload ပိုပေါ့စေပြီး React ဘက်မှာ OpenCV သုံးပြီး remap လုပ်ဖို့ အဆင်အပြေဆုံး ဖြစ်ပါတယ်။
+
+JSON
+{
+  "success": true,
+  "area_id": "Area 01",
+  "grid_shape": {
+    "rows": 20,
+    "cols": 20
+  },
+  "mesh_vertices": [
+    // ဇယားကွက်တစ်ခုချင်းစီ၏ ထောင့်မှတ် Coordinates အသစ်များ (X, Y)
+    // Depth နှင့် Slope အတိုင်း စောင်းသွားသော coordinates များ
+    { "r": 0, "c": 0, "x": 105.2, "y": 75.8 },
+    { "r": 0, "c": 1, "x": 130.5, "y": 76.1 },
+    ...
+  ],
+  "bounding_box": {
+    "x": 100,
+    "y": 70,
+    "width": 420,
+    "height": 380
+  }
+}
+2. FastAPI Backend Code ဥပမာ (Python)
+FastAPI ဘက်မှာ Depth Anything နဲ့ Mesh တွက်ချက်ပြီး အထက်ပါ format တိုင်း ပြန်ထုတ်ပေးမယ့် ပုံစံပါ -
+
+Python
+from fastapi import FastAPI, UploadFile, File, Form
+import numpy as np
+import cv2
+
+app = FastAPI()
+
+@app.post("/api/mesh-warp-perspective")
+async def mesh_warp_perspective(
+    file: UploadFile = File(...),
+    area_id: str = Form(...)
+):
+    contents = await file.read()
+    nparr = np.frombuffer(contents, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
+    # 1. SAM 2 ဖြင့် နံရံ Mask ကို ဖြတ်ထုတ်ခြင်း
+    # 2. Depth Anything V2 ဖြင့် Depth Map ထုတ်ခြင်း
+    
+    # 3. Grid Mesh တည်ဆောက်ပြီး Depth တန်ဖိုးဖြင့် Vertex Displacement တွက်ခြင်း
+    rows, cols = 20, 20
+    mesh_vertices = []
+    
+    # ဥပမာ - Grid တစ်ခုချင်းစီ၏ deformed coordinates များကို တွက်ထုတ်ခြင်း
+    for r in range(rows):
+        for c in range(cols):
+            # Depth gradient နှင့် Slope ကိုအခြေခံ၍ x, y များကို တွက်ချက်သည်
+            new_x = float(c * 20 + (r * 2)) # ဥပမာတွက်ချက်မှု
+            new_y = float(r * 20 + (c * 1))
+            mesh_vertices.append({"r": r, "c": c, "x": new_x, "y": new_y})
+
+    return {
+        "success": True,
+        "area_id": area_id,
+        "grid_shape": {"rows": rows, "cols": cols},
+        "mesh_vertices": mesh_vertices
+    }
+3. React Frontend ဘက်က လက်ခံသုံးမယ့် ပုံစံ
+React ဘက်မှာ FastAPI ဆီက ရလာတဲ့ mesh_vertices တွေကို သုံးပြီး OpenCV ရဲ့ cv.remap (သို့မဟုတ် Mesh-based Triangle Warping) ထဲ ထည့်သွင်း အသုံးပြုနိုင်ပါတယ်။
+
+JavaScript
+const fetchMeshWarpData = async (imageFile, areaId) => {
+  const formData = new FormData();
+  formData.append("file", imageFile);
+  formData.append("area_id", areaId);
+
+  const response = await fetch("http://localhost:8000/api/mesh-warp-perspective", {
+    method: "POST",
+    body: formData,
+  });
+  const data = await response.json();
+
+  if (data.success) {
+    const { rows, cols, mesh_vertices } = data.grid_shape;
+    
+    // ရလာသော mesh_vertices များကို သင့် React state ထဲ သိမ်းဆည်းပြီး
+    // OpenCV remap / mesh rendering ဆက်လုပ်နိုင်ပါပြီ
+    setMeshGrid({ rows, cols, vertices: mesh_vertices });
+  }
+};
